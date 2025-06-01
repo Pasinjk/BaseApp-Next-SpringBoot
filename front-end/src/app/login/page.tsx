@@ -6,7 +6,6 @@ import {
   Input,
   Form,
   Button,
-  addToast,
   Modal,
   ModalContent,
   ModalHeader,
@@ -23,8 +22,11 @@ import { useRouter } from "next/navigation";
 import { FaUser } from "react-icons/fa";
 import { FaLock } from "react-icons/fa";
 import { useState } from "react";
+import { userStore } from "@/stores/user.store";
+import Toast from "@/components/toast";
 
 export default function LoginPage() {
+  const setUser = userStore((state) => state.setUser);
   const router = useRouter();
   const { loading, withLoading } = useLoading();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -32,6 +34,7 @@ export default function LoginPage() {
 
   const fetchUser = async (formData: Object) => {
     const response = await axiosInstance.post("/auth/login", formData);
+    setUser(response.data);
     return response.data;
   };
 
@@ -48,34 +51,26 @@ export default function LoginPage() {
       try {
         await fetchUser(formData);
         router.push("/");
-        addToast({
-          title: "Login success",
-          color: "success",
-          description: "Welcome!",
-        });
+        Toast("success", "Login success", "Welcome!");
       } catch (error) {
-        addToast({
-          title: "Login Failed",
-          color: "danger",
-          description: "Username or password is incorrect.",
-        });
+        Toast("danger", "Login Failed", "Username or password is incorrect.");
         console.log("error", error);
       }
     });
   };
 
   const sentForgetPassword = async (e: PressEvent, onClose: () => void) => {
+    // TODO input validation blank
     console.log(forget);
+
     try {
       await fetchForgetPassword(forget);
-      addToast({
-        title: "Success",
-        color: "success",
-        description: "give us some time to check your request",
-      });
+      Toast("success", "Success", "Give us some time to check your request");
       setForget({ email: "", username: "", detail: "" });
       onClose();
-    } catch (error) {}
+    } catch (error) {
+      Toast("danger", "Failed", "Please check your input");
+    }
   };
 
   return (

@@ -7,9 +7,13 @@ import {
   DropdownItem,
   User,
 } from "@heroui/react";
+import { userStore } from "@/stores/user.store";
 
 export default function UserDropdown() {
-    // TODO import user store and set it in dropdown
+  const username = userStore((state) => state.username());
+  const shortName = userStore((state) => state.shortName());
+
+  //TODO Click logout will reset all
 
   return (
     <div className="pr-5 flex flex-row items-center">
@@ -17,11 +21,9 @@ export default function UserDropdown() {
         <DropdownTrigger>
           <User
             as="button"
-            avatarProps={{
-              src: "https://i.pravatar.cc/150?img=3",
-            }}
-            name="John Doe"
-            description="Admin"
+            avatarProps={{ name: `${shortName}` }}
+            name={`${username}`}
+            description={`${shortName}` + "." + `${username}`}
           />
         </DropdownTrigger>
         <DropdownMenu aria-label="user actions" variant="flat">

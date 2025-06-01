@@ -3,7 +3,7 @@ import { userInsterface } from "../interface/user.insterface";
 import { User } from "@/types/user.type";
 
 export const userSlice: StateCreator<userInsterface> = (set, get) => ({
-  /// TODO Check it again
+
   user: null,
 
   setUser: (user: User) => {
@@ -17,7 +17,7 @@ export const userSlice: StateCreator<userInsterface> = (set, get) => ({
 
   shortName: () => {
     const user = get().user;
-    return user ? `${user.lastName.charAt(0).toUpperCase}` : "";
+    return user ? `${user.lastName.charAt(0).toUpperCase()}` : "";
   },
 
   isAdmin: () => {
