@@ -2,7 +2,6 @@
 import React from "react";
 import {
   Input,
-  Form,
   Button,
   Modal,
   ModalContent,
@@ -10,10 +9,12 @@ import {
   ModalBody,
   ModalFooter,
   Textarea,
-  PressEvent,
 } from "@heroui/react";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Toast from "../toast";
+import axiosInstance from "@/utils/axios";
+import { z, ZodError } from "zod";
+import { forgetPasswordSchema } from "@/validation/loginPage";
 
 interface ForgetPassModalProps {
   isOpen: boolean;
@@ -24,23 +25,66 @@ export default function ForgetPassModal({
   isOpen,
   onOpenChange,
 }: ForgetPassModalProps) {
-  const [forget, setForget] = useState({ email: "", username: "", detail: "" });
-  // const [forgetError, setForgetError] = useState({ email: "", username: "" });
-  const [forgetError, setForgetError] = useState<{
-    email?: string;
-    username?: string;
-  }>({});
-  // TODO input validation blank
-  const onSubmit = (e: PressEvent) => {
-    console.log("--------");
+  type ForgetData = z.infer<typeof forgetPasswordSchema>;
+  const [forgetData, setForgetData] = useState<ForgetData>({
+    email: "",
+    username: "",
+    detail: "",
+  });
+
+  const clearForgetData = useCallback(() => {
+    setForgetData({ email: "", username: "", detail: "" });
+    setValidationError(null);
+  }, []);
+
+  type FieldErrors = {
+    [K in keyof ForgetData]?: string[];
   };
+
+  const [validationError, setValidationError] = useState<FieldErrors | null>(
+    null
+  );
+
+  const fetchForgetPassword = async (forgetData: Object) => {
+    const response = await axiosInstance.post(
+      "/auth/forgetPassword",
+      forgetData
+    );
+    return response.data;
+  };
+
+  const validationCheck = (forgetData: object) => {
+    try {
+      forgetPasswordSchema.parse(forgetData);
+      setValidationError(null);
+      return true;
+    } catch (error) {
+      if (error instanceof ZodError) {
+        setValidationError(error.flatten().fieldErrors);
+      }
+      return false;
+    }
+  };
+
+  const onSubmit = async () => {
+    if (validationCheck(forgetData)) {
+      await fetchForgetPassword(forgetData);
+      Toast.success("Your request was sent to admin.", "Success");
+      setForgetData({ email: "", username: "", detail: "" });
+    }
+  };
+
+  const handleClose = useCallback(() => {
+    clearForgetData();
+    onOpenChange();
+  }, [clearForgetData, onOpenChange]);
 
   return (
     <Modal
       isDismissable={false}
       isKeyboardDismissDisabled={true}
       isOpen={isOpen}
-      onOpenChange={onOpenChange}
+      onOpenChange={handleClose}
       backdrop="blur"
     >
       <ModalContent>
@@ -54,22 +98,24 @@ export default function ForgetPassModal({
                 <Input
                   label="Username"
                   size="sm"
-                  onValueChange={(e) => {
-                    // setForget({ ...forget, username: e.valueOf() });
+                  onValueChange={(value) => {
+                    setForgetData({ ...forgetData, username: value });
                   }}
                   isRequired
                   type="text"
-                  errorMessage="Username is required"
+                  errorMessage={validationError?.username?.[0]}
+                  isInvalid={!!validationError?.username}
                 />
                 <Input
                   label="Email"
                   size="sm"
-                  onValueChange={(e) => {
-                    // setForget({ ...forget, email: e.valueOf() });
+                  onValueChange={(value) => {
+                    setForgetData({ ...forgetData, email: value });
                   }}
                   isRequired
                   type="email"
-                  errorMessage="Email is required"
+                  errorMessage={validationError?.email?.[0]}
+                  isInvalid={!!validationError?.email}
                 />
                 <Textarea
                   label="Detail"
@@ -77,8 +123,8 @@ export default function ForgetPassModal({
                   disableAnimation
                   labelPlacement="inside"
                   placeholder="Please enter your problem"
-                  onValueChange={(e) => {
-                    // setForget({ ...forget, detail: e.valueOf() });
+                  onValueChange={(value) => {
+                    setForgetData({ ...forgetData, detail: value });
                   }}
                 />
               </div>

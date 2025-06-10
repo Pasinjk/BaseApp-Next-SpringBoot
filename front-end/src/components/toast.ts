@@ -1,20 +1,29 @@
 import { addToast } from "@heroui/react";
 
-export default function Toast(
-  color:
-    | "success"
-    | "warning"
-    | "danger"
-    | "default"
-    | "primary"
-    | "secondary"
-    | "foreground",
-  title: string,
-  description: string
-) {
-  addToast({
-    title: title,
-    description: description,
-    color: color,
-  });
-}
+type ToastColor =
+  | "success"
+  | "warning"
+  | "danger"
+  | "default"
+  | "primary"
+  | "secondary"
+  | "foreground";
+
+const Toast = {
+  success: (description: string, title = "Success") =>
+    addToast({ title, description, color: "success" }),
+
+  warning: (description: string, title = "Warning") =>
+    addToast({ title, description, color: "warning" }),
+
+  danger: (description: string, title = "Error") =>
+    addToast({ title, description, color: "danger" }),
+
+  info: (description: string, title = "Info") =>
+    addToast({ title, description, color: "default" }),
+
+  custom: (color: ToastColor, description: string, title = "") =>
+    addToast({ title, description, color }),
+};
+
+export default Toast;

@@ -1,5 +1,4 @@
 "use client";
-// TODO forget password button and modal
 // TODO Middleware redirect to login page if not logged in
 import React from "react";
 import { Input, Form, Button, useDisclosure, PressEvent } from "@heroui/react";
@@ -12,8 +11,6 @@ import { FaLock } from "react-icons/fa";
 
 import { userStore } from "@/stores/user.store";
 import Toast from "@/components/toast";
-import { forgetDataValidate } from "@/validation/loginPage";
-import { z } from "zod";
 import ForgetPassModal from "@/components/Modal/ForgetPass";
 
 export default function LoginPage() {
@@ -28,11 +25,6 @@ export default function LoginPage() {
     return response.data;
   };
 
-  const fetchForgetPassword = async (forget: Object) => {
-    const response = await axiosInstance.post("/auth/forgetPassword", forget);
-    return response.data;
-  };
-
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = Object.fromEntries(new FormData(e.currentTarget));
@@ -41,9 +33,9 @@ export default function LoginPage() {
       try {
         await fetchUser(formData);
         router.push("/");
-        Toast("success", "Login success", "Welcome!");
+        Toast.success("Welcome!", "Login success");
       } catch (error) {
-        Toast("danger", "Login Failed", "Username or password is incorrect.");
+        Toast.danger("Username or password is incorrect.", "Login Failed");
         console.log("error", error);
       }
     });
