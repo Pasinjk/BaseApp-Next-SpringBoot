@@ -12,7 +12,7 @@ import java.util.Date;
 
 @Data
 @MappedSuperclass
-@EntityListeners(EntityListeners.class)
+@EntityListeners(EntityListener.class)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public abstract class BaseEntity implements Serializable {
 
